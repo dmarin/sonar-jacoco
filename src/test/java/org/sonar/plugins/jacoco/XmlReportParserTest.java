@@ -69,6 +69,18 @@ public class XmlReportParserTest {
   }
 
   @Test
+  public void should_parse_report_with_empty_files() throws Exception {
+    Path sample = load("empty_sourcefile.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+    List<XmlReportParser.SourceFile> sourceFiles = report.parse();
+
+    assertThat(sourceFiles).hasSize(1);
+    assertThat(sourceFiles.get(0).name()).isEqualTo("Empty.java");
+    assertThat(sourceFiles.get(0).packageName()).isEqualTo("org/example");
+    assertThat(sourceFiles.get(0).lines()).hasSize(0);
+  }
+
+  @Test
   public void should_fail_if_report_is_not_xml() throws IOException {
     Path filePath = temp.newFile("report.xml").toPath();
     XmlReportParser report = new XmlReportParser(filePath);
@@ -113,6 +125,7 @@ public class XmlReportParserTest {
     Path sample = load("ci_missing_in_line.xml");
     XmlReportParser report = new XmlReportParser(sample);
 
+    // FIXME must imply "0" - see https://github.com/jacoco/jacoco/pull/813
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Invalid report: couldn't find the attribute 'ci' for the sourcefile 'File.java' in line 6");
     report.parse();
